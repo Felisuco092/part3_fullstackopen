@@ -79,9 +79,16 @@ app.post('/api/persons', (request, response, next) => {
 })
 
 app.get('/info', (request, response) => {
-    const message = `<p>Phonebook has info for 2 people</p>
+    Person.find({}).then(persons =>{
+        let count = 0
+        persons.forEach(person => {
+            count += 1
+        })
+        const message = `<p>Phonebook has info for ${count} people</p>
         <p>${new Date().toString()}</p>`
-    response.send(message)
+        response.send(message)
+    })
+    
 })
 
 const unknownEndpoint = (request, response) => {
