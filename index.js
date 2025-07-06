@@ -20,15 +20,19 @@ app.get('/api/persons', (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     Person.findById(request.params.id).then(note => {
+        if (note) {
         response.json(note)
+      } else {
+        response.status(404).end()
+      }
     })
-    .catch(err => response.status(404).end())
+    .catch(err => response.status(400).send({ error: 'malformatted id' }))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-    response.status(204).end()
+    Person.findByIdAndDelete(request.params.id).then(deletedResource => {
+        response.status(201).json(deletedResource)
+    })
 })
 
 app.post('/api/persons', (request, response) => {
