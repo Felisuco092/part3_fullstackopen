@@ -12,13 +12,13 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :r
 
 const Person = require('./models/person')
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     Person.find({}).then(notes => {
         response.json(notes)
-    })
+    }).catch(err => next(err))
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     Person.findById(request.params.id).then(note => {
         if (note) {
         response.json(note)
@@ -26,16 +26,17 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).end()
       }
     })
-    .catch(err => response.status(400).send({ error: 'malformatted id' }))
+    .catch(err => next(err))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id).then(deletedResource => {
         response.status(201).json(deletedResource)
     })
+    .catch(err => next(err))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
     
     if(!body.name) {
@@ -51,6 +52,7 @@ app.post('/api/persons', (request, response) => {
     })
 
     person.save().then(savedPerson => response.json(savedPerson))
+    .catch(err => next(err))
 })
 
 app.get('/info', (request, response) => {
@@ -58,6 +60,25 @@ app.get('/info', (request, response) => {
         <p>${new Date().toString()}</p>`
     response.send(message)
 })
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  return response.status(404).end()
+}
+
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
