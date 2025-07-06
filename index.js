@@ -47,12 +47,35 @@ app.post('/api/persons', (request, response, next) => {
     }
     
     const person = new Person({
-        name:body.name,
-        number:body.number,
-    })
+                name:body.name,
+                number:body.number,
+            })
 
-    person.save().then(savedPerson => response.json(savedPerson))
+    Person.findOne({name : body.name}).then(existingPerson => {
+        
+        if(existingPerson) {
+
+            const personAdd = {
+                name:body.name,
+                number:body.number,
+            }
+            
+            Person.findByIdAndUpdate(existingPerson.id, personAdd, { new: true })
+            .then(updatedPerson => {
+                response.json(updatedPerson)
+            })
+            .catch(err => next(err))
+        } else {
+
+            person.save()
+            .then(savedPerson => response.json(savedPerson))
+            .catch(err => next(err))
+        }
+    })
     .catch(err => next(err))
+
+    
+    
 })
 
 app.get('/info', (request, response) => {
