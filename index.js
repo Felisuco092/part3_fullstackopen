@@ -81,7 +81,7 @@ app.post('/api/persons', (request, response, next) => {
 app.get('/info', (request, response) => {
     Person.find({}).then(persons =>{
         let count = 0
-        persons.forEach(person => {
+        persons.forEach(_person => {
             count += 1
         })
         const message = `<p>Phonebook has info for ${count} people</p>
@@ -97,7 +97,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, _request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
