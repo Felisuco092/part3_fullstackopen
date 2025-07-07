@@ -6,7 +6,7 @@ var morgan = require('morgan')
 
 app.use(express.static('dist'))
 app.use(express.json())
-morgan.token('responseString', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('responseString', function (req) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :responseString'))
 
 
@@ -81,7 +81,7 @@ app.post('/api/persons', (request, response, next) => {
 app.get('/info', (request, response) => {
     Person.find({}).then(persons =>{
         let count = 0
-        persons.forEach(_person => {
+        persons.forEach(() => {
             count += 1
         })
         const message = `<p>Phonebook has info for ${count} people</p>
@@ -97,7 +97,8 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const errorHandler = (error, _request, response, next) => {
+// eslint-disable-next-line no-unused-vars
+const errorHandler = (error, request, response, _next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
