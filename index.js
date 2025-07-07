@@ -60,7 +60,7 @@ app.post('/api/persons', (request, response, next) => {
                 number:body.number,
             }
             
-            Person.findByIdAndUpdate(existingPerson.id, personAdd, { new: true })
+            Person.findByIdAndUpdate(existingPerson.id, personAdd, { new: true, runValidators: true, context: 'query' })
             .then(updatedPerson => {
                 response.json(updatedPerson)
             })
